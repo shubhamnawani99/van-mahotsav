@@ -116,3 +116,19 @@ elif submit_button:
             st.balloons()
         except Exception as e:
             st.error(f"Failed to save data to NeonDB: {e}")
+
+# Universal Government Footer (Always renders)
+st.markdown(
+    """
+    <div class="gov-footer-wrapper">
+        <div class="gov-footer-content">
+            <p class="gov-footer-owner">Content Owned by District Administration</p>
+            <p class="gov-footer-host">
+                Developed and hosted by <span class="nic-brand-text">National Informatics Centre, District Centre Jammu</span>,<br>
+                Ministry of Electronics & Information Technology, Government of India
+            </p>
+        </div>
+    </div>
+    """, 
+    unsafe_allow_html=True
+)

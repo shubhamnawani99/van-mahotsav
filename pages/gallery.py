@@ -69,3 +69,19 @@ else:
             if st.button("🔄 Load More Submissions", key="load_more_btn", use_container_width=True):
                 st.session_state["gallery_limit"] += 10
                 st.rerun()
+
+# Universal Government Footer (Always renders)
+st.markdown(
+    """
+    <div class="gov-footer-wrapper">
+        <div class="gov-footer-content">
+            <p class="gov-footer-owner">Content Owned by District Administration</p>
+            <p class="gov-footer-host">
+                Developed and hosted by <span class="nic-brand-text">National Informatics Centre, District Centre Jammu</span>,<br>
+                Ministry of Electronics & Information Technology, Government of India
+            </p>
+        </div>
+    </div>
+    """, 
+    unsafe_allow_html=True
+)
