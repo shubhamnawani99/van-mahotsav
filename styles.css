@@ -1,0 +1,182 @@
+/* Gradient Background */
+.stApp, .stAppToolbar  {
+    background: linear-gradient(135deg, #f4f9f4 0%, #e8f5e9 40%, #d8f3dc 70%, #b7e4c7 100%);
+    background-attachment: fixed;
+}
+
+/* Dark background with light green font for top navigation */
+header [data-testid="stTopNavLinkContainer"],
+div[data-testid="stTopNavLinkContainer"] {
+    background-color: #1b201a !important; /* Dark slate background */
+    border-radius: 6px !important;
+}
+
+/* Force light green text on all child links/buttons */
+header [data-testid="stTopNavLinkContainer"] *,
+div[data-testid="stTopNavLinkContainer"] * {
+    color: #4EAE52 !important; /* Light green font */
+}
+
+/* Optional: Slight highlight when hovering over the button */
+header [data-testid="stTopNavLinkContainer"]:hover,
+div[data-testid="stTopNavLinkContainer"]:hover {
+    background-color: #2A2E33 !important;
+}
+
+/* Centered Main Titles */
+h1, h2, h3 {
+    text-align: center;
+    color: #1b4332 !important;
+}
+
+/* Green Submit Button */
+.st-key-submit_btn button {
+    background-color: #2d6a4f !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    transition: background-color 0.3s ease;
+}
+
+.st-key-submit_btn button:hover {
+    background-color: #1b4332 !important;
+}
+
+/* Red Reset Button */
+.st-key-reset_btn button {
+    background-color: #d90429 !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    transition: background-color 0.3s ease;
+}
+
+.st-key-reset_btn button:hover {
+    background-color: #a7031b !important;
+}
+
+/* Form Card Container */
+div[data-testid="stForm"] {
+    background-color: #ffffff;
+    border: 1px solid #b7e4c7;
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0px 8px 24px rgba(27, 67, 50, 0.08);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Media Gallery Card Styling */
+.gallery-card {
+    background-color: #ffffff;
+    border: 1px solid #b7e4c7;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0px 4px 12px rgba(27, 67, 50, 0.06);
+}
+
+/* ==========================================================================
+   C. GALLERY CARDS (Matches Form Aesthetics using Keys)
+   ========================================================================== */
+
+/* Target any container whose key class starts with "st-key-gallery_card_" */
+[class^="st-key-gallery_card_"], [class*=" st-key-gallery_card_"] {
+    background-color: #ffffff !important;
+    border: 1px solid #b7e4c7 !important;
+    border-radius: 16px !important;
+    padding: 1.25rem !important;
+    box-shadow: 0px 8px 24px rgba(27, 67, 50, 0.08) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+[class^="st-key-gallery_card_"]:hover, [class*=" st-key-gallery_card_"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0px 12px 28px rgba(27, 67, 50, 0.12) !important;
+}
+
+/* Card Heading Text Color (Updated to h5 to match st.markdown "#####") */
+[class^="st-key-gallery_card_"] h5, [class*=" st-key-gallery_card_"] h5 {
+    color: #1b4332 !important;
+    margin-bottom: 0.5rem;
+}
+
+/* ==========================================================================
+   LOAD MORE BUTTON
+   ========================================================================== */
+.st-key-load_more_btn button {
+    background-color: #2d6a4f !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    padding: 0.6rem 1.5rem;
+    transition: background-color 0.3s ease;
+}
+
+.st-key-load_more_btn button:hover {
+    background-color: #1b4332 !important;
+}
+
+/* Sticky Structural Footer Architecture */
+.gov-footer-wrapper {
+    background-color: #111111;
+    color: #ffffff;
+    width: 100vw;
+
+    /* Center breakout strategy */
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+
+    /* Force layout alignment to viewport floor */
+    margin-top: 3rem;
+    padding: 24px 0;
+    box-sizing: border-box;
+    z-index: 99;
+}
+
+.gov-footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    text-align: center;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.gov-footer-owner {
+    margin: 0 0 4px 0;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #e0e0e0;
+}
+
+.gov-footer-host {
+    margin: 0;
+    color: #aaaaaa;
+}
+
+.nic-brand-text {
+    color: #00a6e6;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+[data-testid="stMainBlockContainer"] {
+    padding-top: 2rem;
+    max-width: 90%;
+    padding-bottom: 0%;
+}
+
+[data-testid="stTopNavLinkContainer"] {
+    background-color: #FFFDD0 !important;
+    border-radius: 4px;
+
+}

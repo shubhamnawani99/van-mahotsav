@@ -1,0 +1,52 @@
+import os
+import streamlit as st
+from db import init_db
+
+# Page Configuration
+st.set_page_config(
+    page_title="VAN MAHOTSAV 2026 - Jammu",
+    page_icon="🌳",
+    layout="wide"
+)
+
+# Load External CSS File
+def load_css(file_name="styles.css"):
+    if os.path.exists(file_name):
+        with open(file_name, "r") as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+load_css("styles.css")
+
+# Initialize Database Table
+init_db()
+
+# Navigation setup using st.navigation and st.Page
+page_1 = st.Page("pages/registration.py", title="Registration Form", icon="📝", default=True)
+page_2 = st.Page("pages/gallery.py", title="Media Gallery", icon="🖼️")
+
+pg = st.navigation([page_1, page_2],    
+                   position="top",
+                   expanded=True,)
+
+# Header Title
+st.title("DISTRICT ADMINISTRATION JAMMU - VAN MAHOTSAV 2026")
+
+# Render active page safely
+try:
+    pg.run()
+finally:
+    # Universal Government Footer (Always renders)
+    st.markdown(
+        """
+        <div class="gov-footer-wrapper">
+            <div class="gov-footer-content">
+                <p class="gov-footer-owner">Content Owned by District Administration</p>
+                <p class="gov-footer-host">
+                    Developed and hosted by <span class="nic-brand-text">National Informatics Centre, District Centre Jammu</span>,<br>
+                    Ministry of Electronics & Information Technology, Government of India
+                </p>
+            </div>
+        </div>
+        """, 
+        unsafe_allow_html=True
+    )
