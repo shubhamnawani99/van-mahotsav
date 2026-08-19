@@ -84,6 +84,18 @@ div[data-testid="stForm"] {
    C. GALLERY CARDS (Matches Form Aesthetics using Keys)
    ========================================================================== */
 
+   /* Full-screen removed */
+.stImage img {
+    pointer-events: none !important;
+}
+
+div[data-testid="stElementToolbar"], .stElementToolbar {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
 /* Target any container whose key class starts with "st-key-gallery_card_" */
 [class^="st-key-gallery_card_"], [class*=" st-key-gallery_card_"] {
     background-color: #ffffff !important;

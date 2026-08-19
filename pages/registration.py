@@ -40,9 +40,6 @@ with st.form(key="van_mahotsav_form", clear_on_submit=True):
         if photo.size > MAX_FILE_SIZE:
             st.error("File size exceeds the 2 MB limit. Please upload a smaller image.")
             photo = None
-        # else:
-        #     image = Image.open(photo)
-        #     st.image(image, caption="Uploaded Image Preview", use_container_width=True)
 
     # 9. Participant Count
     participant_count = st.number_input("9. Number of Participants*", min_value=1, step=1, value=1)

@@ -21,7 +21,7 @@ def init_db():
                     photo_filename VARCHAR(255),
                     photo_bytes BYTEA,
                     participant_count INT NOT NULL,
-                    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    submitted_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'Asia/Kolkata')
                 );
             """))
             

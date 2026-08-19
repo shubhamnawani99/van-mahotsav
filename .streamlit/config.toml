@@ -8,5 +8,3 @@ textColor = "#1b4332"
 hideTopBar = true
 [server]
 maxUploadSize = 2
-[client]
-showImageLightbox = false
