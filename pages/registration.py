@@ -13,17 +13,17 @@ ist_today = datetime.datetime.now(zoneinfo.ZoneInfo("Asia/Kolkata")).date()
 with st.form(key="van_mahotsav_form", clear_on_submit=True):
     st.markdown("### Registration & Activity Submission Form")
     
-    # 1. Name
-    name = st.text_input("1. Name*", placeholder="Enter your full name")
-    
-    # 2. Mobile Number
-    mobile = st.text_input("2. Mobile Number*", max_chars=10, placeholder="10-digit mobile number")
-    
-    # 3. Designation
-    designation = st.text_input("3. Designation*", placeholder="e.g., Forest Officer, Teacher, Citizen")
-    
-    # 4. Department Name
-    department = st.text_input("4. Department Name*", placeholder="e.g., Forest Department, Education, General Public")
+    col1, col2 = st.columns(2)
+    with col1:
+        name = st.text_input("1. Name*", placeholder="Enter your full name")
+    with col2:
+        mobile = st.text_input("2. Mobile Number*", max_chars=10, placeholder="10-digit mobile number")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        designation = st.text_input("3. Designation*", placeholder="e.g., Forest Officer, Teacher, Citizen")
+    with col2:
+        department = st.text_input("4. Department Name*", placeholder="e.g., Forest Department, Education, General Public")
     
     # 5. State & 6. District
     col1, col2 = st.columns(2)
@@ -54,9 +54,13 @@ with st.form(key="van_mahotsav_form", clear_on_submit=True):
             st.error("File size exceeds the 2 MB limit. Please upload a smaller image.")
             photo = None
 
-    # 10. Participant Count
-    participant_count = st.number_input("10. Number of Participants*", min_value=1, step=1, value=1)
-
+    # Add widget alongside participant count
+    col_p1, col_p2 = st.columns(2)
+    with col_p1:
+        participant_count = st.number_input("10. Number of Participants*", min_value=1, step=1, value=1)
+    with col_p2:
+        no_of_trees_planted = st.number_input("11. Total Number of Trees Planted*", min_value=1, step=1, value=1)
+        
     # Submit and Reset Buttons with unique keys
     col_submit, col_reset = st.columns(2)
 
@@ -99,8 +103,8 @@ elif submit_button:
             # Parameterized query using SQLAlchemy named syntax
             insert_query = text("""
                 INSERT INTO van_mahotsav_submissions 
-                (name, mobile, designation, department, state, district, description, photo_filename, photo_bytes, participant_count, plantation_done_on)
-                VALUES (:name, :mobile, :designation, :department, :state, :district, :description, :filename, :bytes, :count, :plantation_date)
+                (name, mobile, designation, department, state, district, description, photo_filename, photo_bytes, participant_count, no_of_trees_planted, plantation_done_on)
+                VALUES (:name, :mobile, :designation, :department, :state, :district, :description, :filename, :bytes, :count, :trees, :plantation_date)
             """)
 
             # Execute via st.connection session
@@ -116,11 +120,12 @@ elif submit_button:
                     "filename": photo_filename,
                     "bytes": photo_bytes,  # Raw bytes are automatically mapped to BYTEA
                     "count": participant_count,
+                    "trees": no_of_trees_planted,
                     "plantation_date": plantation_done_on
                 })
                 session.commit()
             # Generate Certificate Bytes
-            cert_bytes = generate_certificate(name, str(plantation_done_on))
+            cert_bytes = generate_certificate(name, str(plantation_done_on), no_of_trees_planted)
 
             st.toast("Form submitted successfully! Thank you for participating in Van Mahotsav 2026.", icon="🎉")
             st.balloons()
@@ -139,8 +144,6 @@ elif submit_button:
             # Clear cached queries so the new entry immediately reflects in the gallery
             st.cache_data.clear()
 
-            st.toast("Form submitted successfully! Thank you for participating in Van Mahotsav 2026.", icon="🎉")
-            st.balloons()
         except Exception as e:
             st.error(f"Failed to save data to NeonDB: {e}")
 

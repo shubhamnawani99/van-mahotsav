@@ -11,8 +11,8 @@ if st.button("Search Registration", type="primary"):
     if search_query.strip():
         record = get_submission_by_identifier(search_query)
         if record:
-            rec_name, rec_mobile, rec_date = record
-            cert_bytes = generate_certificate(rec_name, str(rec_date))
+            rec_name, rec_mobile, rec_date, rec_no_of_trees_planted = record
+            cert_bytes = generate_certificate(rec_name, str(rec_date), rec_no_of_trees_planted)
             
             st.success(f"Record found for **{rec_name}**!")
             st.image(cert_bytes, caption="Certificate Preview", use_container_width=True)

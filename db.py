@@ -21,6 +21,7 @@ def init_db():
                     photo_filename VARCHAR(255),
                     photo_bytes BYTEA,
                     participant_count INT NOT NULL,
+                    no_of_trees_planted INT NOT NULL DEFAULT 1,
                     plantation_done_on DATE NOT NULL DEFAULT (CURRENT_DATE AT TIME ZONE 'Asia/Kolkata'),
                     submitted_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'Asia/Kolkata')
                 );
@@ -74,7 +75,7 @@ def get_submission_by_identifier(identifier: str):
     """Fetch participant details by Mobile or Name."""
     try:
         query = text("""
-            SELECT name, mobile, plantation_done_on 
+            SELECT name, mobile, plantation_done_on, no_of_trees_planted
             FROM van_mahotsav_submissions 
             WHERE mobile = :id OR LOWER(name) = LOWER(:id)
             ORDER BY submitted_at DESC 
