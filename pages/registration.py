@@ -4,6 +4,14 @@ from db import conn
 import streamlit as st
 from PIL import Image
 
+import datetime
+import zoneinfo
+from PIL import Image
+import io
+
+# Get current date in IST for max_value bound and default value
+ist_today = datetime.datetime.now(zoneinfo.ZoneInfo("Asia/Kolkata")).date()
+
 with st.form(key="van_mahotsav_form", clear_on_submit=True):
     st.markdown("### Registration & Activity Submission Form")
     
@@ -29,11 +37,18 @@ with st.form(key="van_mahotsav_form", clear_on_submit=True):
     with col2:
         district = st.text_input("6. District*", value="Jammu" if state == "Jammu & Kashmir" else "")
 
-    # 7. Description
-    description = st.text_area("7. Description*", placeholder="Briefly describe the activity or event details...")
+    # 7. Date of Plantation
+    plantation_done_on = st.date_input(
+        "7. Plantation Date*", 
+        value=ist_today,
+        max_value=ist_today
+    )
 
-    # 8. Photo Upload (Max size: 2MB)
-    photo = st.file_uploader("8. Photo Upload* (Max size: 2MB)", type=["jpg", "jpeg", "png"])
+    # 8. Description
+    description = st.text_area("8. Description*", placeholder="Briefly describe the activity or event details...")
+
+    # 9. Photo Upload (Max size: 2MB)
+    photo = st.file_uploader("9. Photo Upload* (Max size: 2MB)", type=["jpg", "jpeg", "png"])
     MAX_FILE_SIZE = 2 * 1024 * 1024
     
     if photo is not None:
@@ -41,8 +56,8 @@ with st.form(key="van_mahotsav_form", clear_on_submit=True):
             st.error("File size exceeds the 2 MB limit. Please upload a smaller image.")
             photo = None
 
-    # 9. Participant Count
-    participant_count = st.number_input("9. Number of Participants*", min_value=1, step=1, value=1)
+    # 10. Participant Count
+    participant_count = st.number_input("10. Number of Participants*", min_value=1, step=1, value=1)
 
     # Submit and Reset Buttons with unique keys
     col_submit, col_reset = st.columns(2)
@@ -66,7 +81,7 @@ if reset_button:
     st.toast("Form has been reset and cleared.", icon="🧹")
 
 elif submit_button:
-    if not name or not mobile or not designation or not department or not state or not district or not description or photo is None:
+    if not name or not mobile or not designation or not department or not state or not district or not description or not plantation_done_on or photo is None:
         st.error("Please fill in all mandatory fields (*) and upload a valid photo (<= 2MB).")
     elif len(mobile) != 10 or not mobile.isdigit():
         st.error("Please enter a valid 10-digit mobile number.")
@@ -86,8 +101,8 @@ elif submit_button:
             # Parameterized query using SQLAlchemy named syntax
             insert_query = text("""
                 INSERT INTO van_mahotsav_submissions 
-                (name, mobile, designation, department, state, district, description, photo_filename, photo_bytes, participant_count)
-                VALUES (:name, :mobile, :designation, :department, :state, :district, :description, :filename, :bytes, :count)
+                (name, mobile, designation, department, state, district, description, photo_filename, photo_bytes, participant_count, plantation_done_on)
+                VALUES (:name, :mobile, :designation, :department, :state, :district, :description, :filename, :bytes, :count, :plantation_date)
             """)
 
             # Execute via st.connection session
@@ -102,7 +117,8 @@ elif submit_button:
                     "description": description,
                     "filename": photo_filename,
                     "bytes": photo_bytes,  # Raw bytes are automatically mapped to BYTEA
-                    "count": participant_count
+                    "count": participant_count,
+                    "plantation_date": plantation_done_on
                 })
                 session.commit()
 

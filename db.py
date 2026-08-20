@@ -21,6 +21,7 @@ def init_db():
                     photo_filename VARCHAR(255),
                     photo_bytes BYTEA,
                     participant_count INT NOT NULL,
+                    plantation_done_on DATE NOT NULL DEFAULT (CURRENT_DATE AT TIME ZONE 'Asia/Kolkata'),
                     submitted_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'Asia/Kolkata')
                 );
             """))
@@ -29,6 +30,9 @@ def init_db():
             session.execute(text("""
                 CREATE INDEX IF NOT EXISTS idx_van_mahotsav_submitted_at 
                 ON van_mahotsav_submissions (submitted_at DESC);
+
+                CREATE INDEX IF NOT EXISTS idx_van_mahotsav_plantation_date 
+                ON van_mahotsav_submissions (plantation_done_on DESC);
             """))
             
             session.commit()
@@ -39,10 +43,11 @@ def init_db():
 def fetch_submissions(limit=10):
     try:
         query = text("""
-            SELECT name, designation, department, state, district, description, photo_bytes, participant_count, submitted_at 
-            FROM van_mahotsav_submissions 
-            ORDER BY submitted_at DESC 
-            LIMIT :limit;
+        SELECT name, designation, department, state, district, 
+               description, photo_bytes, participant_count, plantation_done_on, submitted_at 
+        FROM van_mahotsav_submissions 
+        ORDER BY submitted_at DESC 
+        LIMIT :limit
         """)
         
         with conn.session as session:

@@ -21,14 +21,14 @@ else:
 
     for index, item in enumerate(submissions):
         (rec_name, rec_designation, rec_dept, rec_state, rec_district, 
-         rec_desc, rec_photo, rec_participants, rec_date) = item
+         rec_desc, rec_photo, rec_participants, rec_plantation_date, rec_date) = item
         
         col_target = cols[index % cols_per_row]
         
         with col_target:
-            # C. Form-matching styled card wrapper using unique, dynamic keys
+            # Form-matching styled card wrapper using unique, dynamic keys
             with st.container(border=True, key=f"gallery_card_{index}"):
-                # D. Fix image rendering for PostgreSQL BYTEA / memoryview
+                # Fix image rendering for PostgreSQL BYTEA / memoryview
                 if rec_photo:
                     try:
                         # Handle memoryview/bytes conversion safely
@@ -50,24 +50,26 @@ else:
                         except Exception:
                             st.warning("⚠️ Image preview unavailable")
                 
-                formatted_date = rec_date.strftime("%b %d, %Y - %I:%M %p") if rec_date else "N/A"
+                formatted_submitted_date = rec_date.strftime("%b %d, %Y - %I:%M %p") if rec_date else "N/A"
+                formatted_plantation_date = rec_plantation_date.strftime("%b %d, %Y") if rec_plantation_date else "N/A"
                 desc_snippet = rec_desc[:100] + "..." if len(rec_desc) > 100 else rec_desc
 
                 st.markdown(f"##### 👤 {rec_name}")
                 st.markdown(f"**Designation:** {rec_designation}")
                 st.markdown(f"**🏢 Dept:** {rec_dept}")
                 st.markdown(f"**📍 Location:** {rec_district}, {rec_state}")
+                st.markdown(f"**🌱 Plantation Date:** {formatted_plantation_date}")
                 st.markdown(f"**👥 Participants:** {rec_participants}")
                 st.markdown(f"**📝 Description:** {desc_snippet}")
-                st.caption(f"📅 *Submitted on: {formatted_date}*")
+                st.caption(f"📅 *Submitted on: {formatted_submitted_date}*")
 
-    # B. "Load More" button at the bottom (shown if more entries exist)
-    if len(submissions) >= st.session_state["gallery_limit"]:
+    # "Load More" button at the bottom
+    if len(submissions) >= st.session_state.get("gallery_limit", 10):
         st.markdown("<br>", unsafe_allow_html=True)
         col_center = st.columns([1, 2, 1])[1]
         with col_center:
             if st.button("🔄 Load More Submissions", key="load_more_btn", use_container_width=True):
-                st.session_state["gallery_limit"] += 10
+                st.session_state["gallery_limit"] = st.session_state.get("gallery_limit", 10) + 10
                 st.rerun()
 
 # Universal Government Footer (Always renders)
