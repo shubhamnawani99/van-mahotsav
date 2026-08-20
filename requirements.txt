@@ -2,3 +2,5 @@ streamlit
 sqlalchemy
 psycopg2-binary
 pillow
+fpdf2 
+uharfbuzz

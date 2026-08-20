@@ -3,13 +3,13 @@ import streamlit as st
 from PIL import Image, ImageOps
 from db import fetch_submissions
 
-st.markdown("## 📸 Media Submissions Gallery")
+st.markdown("## 📸 PAALNA Media Submissions Gallery")
 
-# B. Manage display count using session state (default = 10)
+# Manage display count using session state (default = 10)
 if "gallery_limit" not in st.session_state:
     st.session_state["gallery_limit"] = 10
 
-# A. Display loading spinner while fetching submissions
+# Display loading spinner while fetching submissions
 with st.spinner("Loading media gallery..."):
     submissions = fetch_submissions(limit=st.session_state["gallery_limit"])
 
@@ -20,8 +20,8 @@ else:
     cols = st.columns(cols_per_row)
 
     for index, item in enumerate(submissions):
-        (rec_name, rec_designation, rec_dept, rec_state, rec_district, 
-         rec_desc, rec_photo, rec_participants, rec_plantation_date, rec_date) = item
+        (s_name, s_class, sch_name, t_name, species, 
+         p_date, height, loc, teacher, h_guardian, photo, sub_date) = item
         
         col_target = cols[index % cols_per_row]
         
@@ -29,15 +29,16 @@ else:
             # Form-matching styled card wrapper using unique, dynamic keys
             with st.container(border=True, key=f"gallery_card_{index}"):
                 # Fix image rendering for PostgreSQL BYTEA / memoryview
-                if rec_photo:
+                photo_bytes = None
+                if photo:
                     try:
                         # Handle memoryview/bytes conversion safely
-                        if isinstance(rec_photo, memoryview):
-                            photo_bytes = rec_photo.tobytes()
-                        elif isinstance(rec_photo, bytes):
-                            photo_bytes = rec_photo
+                        if isinstance(photo, memoryview):
+                            photo_bytes = photo.tobytes()
+                        elif isinstance(photo, bytes):
+                            photo_bytes = photo
                         else:
-                            photo_bytes = bytes(rec_photo)
+                            photo_bytes = bytes(photo)
 
                         # Render with Streamlit or PIL fallback
                         img = Image.open(io.BytesIO(photo_bytes))
@@ -50,17 +51,15 @@ else:
                         except Exception:
                             st.warning("⚠️ Image preview unavailable")
                 
-                formatted_submitted_date = rec_date.strftime("%b %d, %Y - %I:%M %p") if rec_date else "N/A"
-                formatted_plantation_date = rec_plantation_date.strftime("%b %d, %Y") if rec_plantation_date else "N/A"
-                desc_snippet = rec_desc[:100] + "..." if len(rec_desc) > 100 else rec_desc
+                formatted_submitted_date = sub_date.strftime("%b %d, %Y - %I:%M %p") if sub_date else "N/A"
+                formatted_plantation_date = p_date.strftime("%b %d, %Y") if p_date else "N/A"
 
-                st.markdown(f"##### 👤 {rec_name}")
-                st.markdown(f"**Designation:** {rec_designation}")
-                st.markdown(f"**🏢 Dept:** {rec_dept}")
-                st.markdown(f"**📍 Location:** {rec_district}, {rec_state}")
-                st.markdown(f"**🌱 Plantation Date:** {formatted_plantation_date}")
-                st.markdown(f"**👥 Participants:** {rec_participants}")
-                st.markdown(f"**📝 Description:** {desc_snippet}")
+                st.markdown(f"##### 🌳 {t_name}")
+                st.markdown(f"**👤 Student:** {s_name} ({s_class})")
+                st.markdown(f"**🏫 School:** {sch_name}")
+                st.markdown(f"**🌿 Species:** {species} ({height} cm)")
+                st.markdown(f"**📍 Location:** {loc}")
+                st.markdown(f"**🌱 Planted On:** {formatted_plantation_date}")
                 st.caption(f"📅 *Submitted on: {formatted_submitted_date}*")
 
     # "Load More" button at the bottom

@@ -1,84 +1,166 @@
 import os
-import io
-from PIL import Image, ImageDraw, ImageFont
+import random
+from fpdf import FPDF
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FONTS_DIR = os.path.join(BASE_DIR, "fonts")
 
-def get_font(font_name: str, size: int):
-    """Case-insensitive local font loader with Linux system fallback."""
-    # 1. Search fonts/ directory (case-insensitive)
-    if os.path.exists(FONTS_DIR):
-        for file in os.listdir(FONTS_DIR):
-            if file.lower() == font_name.lower():
-                return ImageFont.truetype(os.path.join(FONTS_DIR, file), size)
+REG_FONT_PATH = os.path.join(FONTS_DIR, "NotoSansDevanagari-Regular.ttf")
+BOLD_FONT_PATH = os.path.join(FONTS_DIR, "NotoSansDevanagari-Bold.ttf")
 
-    # 2. Linux System Fonts Fallback (Streamlit Cloud Debian Environment)
-    system_font_paths = [
-        f"/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if "bd" in font_name.lower() or "georgia" in font_name.lower() else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
-        "/usr/share/fonts/truetype/freefont/FreeSans.ttf"
+# System fallbacks if local fonts directory is missing fonts
+if not os.path.exists(REG_FONT_PATH):
+    REG_FONT_PATH = "/usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf"
+
+if not os.path.exists(BOLD_FONT_PATH):
+    BOLD_FONT_PATH = "/usr/share/fonts/truetype/noto/NotoSansDevanagari-Bold.ttf"
+    if not os.path.exists(BOLD_FONT_PATH):
+        BOLD_FONT_PATH = REG_FONT_PATH  # Fallback to regular if bold doesn't exist
+
+
+class CertificatePDF(FPDF):
+    def footer(self):
+        self.set_y(-20)
+        self.set_font("NotoHindi", style="", size=9)
+        self.set_text_color(68, 68, 68)
+        self.cell(0, 10, "paalna.jammu.nic.in", align="L")
+        self.cell(0, 10, f"Page {self.page_no()}", align="R")
+
+
+def generate_paalna_certificate(
+    student_name: str, student_class: str, school_name: str, 
+    tree_name: str, species: str, planted_on: str, 
+    height_cm: str, location: str, teacher_name: str, holiday_guardian: str
+) -> bytes:
+    
+    pdf = CertificatePDF(orientation="P", unit="mm", format="A4")
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+    
+    # Register Noto Sans Devanagari Regular and Bold fonts
+    pdf.add_font("NotoHindi", style="", fname=REG_FONT_PATH)
+    pdf.add_font("NotoHindi", style="B", fname=BOLD_FONT_PATH)
+    pdf.add_font("NotoHindi", style="I", fname=REG_FONT_PATH)
+    pdf.add_font("NotoHindi", style="BI", fname=BOLD_FONT_PATH)
+    
+    pdf.set_font("NotoHindi", style="", size=10)
+    
+    # Enable HarfBuzz Devanagari Shaping natively inside FPDF2
+    # Fixes 'कि', half-letters, and halants
+    pdf.set_text_shaping(True)
+
+    # 1. Outer Double Green Border
+    pdf.set_draw_color(11, 110, 56) # #0B6E38
+    pdf.set_line_width(1)
+    pdf.rect(7, 7, 196, 283)
+    pdf.set_line_width(0.3)
+    pdf.rect(9, 9, 192, 279)
+
+    # 2. Header Section
+    pdf.set_text_color(11, 110, 56)
+    pdf.set_font("NotoHindi", style="B", size=14)
+    pdf.cell(0, 7, "जिला प्रशासन जम्मू / DISTRICT ADMINISTRATION JAMMU", align="C", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 7, "पालना / PAALNA", align="C", new_x="LMARGIN", new_y="NEXT")
+    
+    pdf.set_text_color(217, 83, 79) # Crimson Motto
+    pdf.set_font("NotoHindi", style="B", size=11)
+    pdf.cell(0, 6, "पेड़ लगाओ नहीं – पेड़ पालो।", align="C", new_x="LMARGIN", new_y="NEXT")
+    pdf.set_text_color(51, 51, 51)
+    pdf.cell(0, 6, "DON'T PLANT A TREE. RAISE ONE.", align="C", new_x="LMARGIN", new_y="NEXT")
+    
+    pdf.ln(3)
+    pdf.set_text_color(11, 110, 56)
+    pdf.set_font("NotoHindi", style="B", size=12)
+    pdf.cell(0, 6, "वृक्ष गोद-ग्रहण प्रमाण-पत्र / CERTIFICATE OF TREE ADOPTION", align="C", new_x="LMARGIN", new_y="NEXT")
+    
+    # Serial Number
+    serial_no = f"PAALNA/2026/{random.randint(1000, 9999)}"
+    pdf.set_font("NotoHindi", style="", size=9)
+    pdf.set_text_color(51, 51, 51)
+    pdf.cell(0, 5, f"क्रमांक / NO. {serial_no}", align="R", new_x="LMARGIN", new_y="NEXT")
+    pdf.ln(2)
+
+    # 3. Adopter Certification Clause
+    cert_text = (
+        f"प्रमाणित किया जाता है कि {student_name.title()} (कक्षा: {student_class}), "
+        f"{school_name} ने नीचे दर्ज वृक्ष को गोद लिया है। आज से इसकी देखभाल की ज़िम्मेदारी इनकी है।\n"
+        f"This certifies that the student named above has adopted the tree recorded below. From today, its care is in their hands."
+    )
+    pdf.set_font("NotoHindi", style="", size=10)
+    pdf.multi_cell(0, 5, cert_text, align="L")
+    pdf.ln(4)
+
+    # 4. Metadata Grid (Table)
+    tree_id = f"TREE-{random.randint(10000, 99999)}"
+    grid_data = [
+        ["वृक्ष का नाम / Tree's Name", tree_name, "वृक्ष क्रमांक / Tree ID", tree_id],
+        ["प्रजाति / Species", species, "रोपण तिथि / Planted On", planted_on],
+        ["ऊँचाई सें.मी. / Height (cms.)", f"{height_cm} cm", "स्थान / Location", location]
     ]
-    for sys_path in system_font_paths:
-        if os.path.exists(sys_path):
-            return ImageFont.truetype(sys_path, size)
-
-    # 3. Last-resort default PIL font
-    return ImageFont.load_default()
-
-def generate_certificate(name: str, plantation_date: str, tree_count: int = 1) -> bytes:
-    bg_path = os.path.join(BASE_DIR, "certificate_bg.png")
-    green_color = "#0B6E38"
     
-    # 1. Load Background Image or Fallback to Blank Canvas
-    if os.path.exists(bg_path):
-        image = Image.open(bg_path).convert("RGB")
-    else:
-        image = Image.new("RGB", (1200, 850), "#F7F9F8")
+    with pdf.table(col_widths=(50, 50, 50, 50), line_height=6, text_align="LEFT") as table:
+        for row in grid_data:
+            r = table.row()
+            for cell in row:
+                r.cell(cell)
 
-    draw = ImageDraw.Draw(image)
-    width, height = image.size
+    pdf.ln(4)
 
-    # 2. Draw Double Green Border
-    draw.rectangle([30, 30, width - 30, height - 30], outline=green_color, width=4)
-    draw.rectangle([40, 40, width - 40, height - 40], outline=green_color, width=2)
+    # 5. The Pledge Block
+    pledge_text = (
+        "शपथ / THE PLEDGE\n"
+        "यह पेड़ मेरा है। मैं इसे रोज़ देखने जाऊँगा/जाऊँगी, पानी दूंगा/दूँगी, और इसे बड़ा होते हुए देखूँगा / देखूँगा। "
+        "जब तक मैं इस विद्यालय में हूँ, यह पेड़ अकेला नहीं रहेगा।\n"
+        "This tree is mine. I will visit it, water it, and watch it grow. For as long as I am at this school, this tree will not stand alone."
+    )
+    pdf.set_fill_color(253, 251, 247)
+    pdf.multi_cell(0, 5, pledge_text, border=1, fill=True, align="L")
+    pdf.ln(4)
 
-    # 3. Load Fonts safely from the fonts/ folder
-    title_font = get_font("ARIALBD.ttf", 38)
-    subtitle_font = get_font("ARIAL.ttf", 26)
-    name_font = get_font("GEORGIAB.ttf", 44)
-    body_font = get_font("ARIAL.ttf", 20)
-    bold_body_font = get_font("ARIALBD.ttf", 20)
+    # 6. 12-Month Growth Record Table
+    pdf.set_font("NotoHindi", style="B", size=10)
+    pdf.set_text_color(11, 110, 56)
+    pdf.cell(0, 5, "बारह-महीनों की बही / 12-MONTH GROWTH RECORD", align="C", new_x="LMARGIN", new_y="NEXT")
+    pdf.set_font("NotoHindi", style="", size=8)
+    pdf.set_text_color(88, 88, 88)
+    pdf.cell(0, 4, "FILLED IN BY THE ADOPTER, ONCE A MONTH", align="C", new_x="LMARGIN", new_y="NEXT")
+    pdf.ln(2)
 
-    # 4. Draw Header Banner & Title
-    draw.rectangle([80, 80, width - 80, 150], fill=green_color)
-    draw.text((width / 2, 115), "CERTIFICATE OF PARTICIPATION", fill="white", font=title_font, anchor="mm")
+    pdf.set_font("NotoHindi", style="", size=9)
+    pdf.set_text_color(0, 0, 0)
+    with pdf.table(col_widths=(35, 40, 35, 80), line_height=5, text_align="CENTER") as table:
+        header = table.row()
+        header.cell("माह / MONTH")
+        header.cell("ऊँचाई सें.मी. / HEIGHT CM")
+        header.cell("जीवित ? / ALIVE?")
+        header.cell("संरक्षक के हस्ताक्षर / GUARDIAN'S SIGNATURE")
+        
+        for i in range(12):
+            r = table.row()
+            r.cell(f"Month {i+1}")
+            r.cell("")
+            r.cell("")
+            r.cell("")
+
+    pdf.ln(6)
+
+    # 7. Signatures Block
+    sig_data = [
+        [f"गोद लेने वाला विद्यार्थी\nAdopter student\n{student_name.title()}", 
+         f"सह-संरक्षक शिक्षक\nCo-guardian teacher\n{teacher_name.title()}", 
+         f"अवकाश संरक्षक\nHoliday guardian\n{holiday_guardian.title()}"],
+        ["\nप्रधानाचार्य\n\nHead of School", "", "\nउपायुक्त, जम्मू\n\nDeputy Commissioner, Jammu"]
+    ]
     
-    # 5. Draw Subtitle
-    draw.text((width / 2, 210), "This is to certify that", fill="#333333", font=subtitle_font, anchor="mm")
-    
-    # 6. Draw Name & Name Underline
-    draw.text((width / 2, 290), name.title(), fill="#111111", font=name_font, anchor="mm")
-    draw.line([(width / 2 - 250, 325), (width / 2 + 250, 325)], fill=green_color, width=2)
-    
-    # 7. Draw Complete Body Description
-    formatted_date = str(plantation_date)
-    msg1 = f"has successfully contributed to the environment by planting {tree_count} tree(s)"
-    msg2 = f"on {formatted_date} as part of the Greenificate Tree Plantation Initiative."
-    msg3 = "We appreciate your commitment to the planet, and your effort in fostering a"
-    msg4 = "greener, healthier future for generations to come."
+    with pdf.table(col_widths=(63, 64, 63), line_height=5, text_align="CENTER", borders_layout="NONE") as table:
+        for row in sig_data:
+            r = table.row()
+            for cell in row:
+                r.cell(cell)
 
-    draw.text((width / 2, 380), msg1, fill="#444444", font=body_font, anchor="mm")
-    draw.text((width / 2, 415), msg2, fill="#444444", font=bold_body_font, anchor="mm")
-    draw.text((width / 2, 470), msg3, fill="#555555", font=body_font, anchor="mm")
-    draw.text((width / 2, 500), msg4, fill="#555555", font=body_font, anchor="mm")
-    
-    # 8. Draw Footer Details
-    draw.text((120, 680), "Issued by:", fill="#333333", font=bold_body_font)
-    draw.text((120, 715), "Greenificate Tree Plantation Initiative", fill=green_color, font=bold_body_font)
-    draw.text((120, 745), "District Administration Jammu", fill="#666666", font=body_font)
+    pdf.ln(4)
+    pdf.set_font("NotoHindi", style="B", size=10)
+    pdf.set_text_color(11, 110, 56)
+    pdf.cell(0, 5, "हर पेड़ का एक नाम, हर नाम का एक ज़िम्मेदार", align="C")
 
-    # 9. Output to Bytes
-    img_byte_arr = io.BytesIO()
-    image.save(img_byte_arr, format="PNG")
-    return img_byte_arr.getvalue()
+    return bytes(pdf.output())
