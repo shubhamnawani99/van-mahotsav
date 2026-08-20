@@ -69,3 +69,20 @@ def fetch_submissions(limit=10):
     except Exception as e:
         st.error(f"Failed to fetch media submissions: {e}")
         return []
+
+def get_submission_by_identifier(identifier: str):
+    """Fetch participant details by Mobile or Name."""
+    try:
+        query = text("""
+            SELECT name, mobile, plantation_done_on 
+            FROM van_mahotsav_submissions 
+            WHERE mobile = :id OR LOWER(name) = LOWER(:id)
+            ORDER BY submitted_at DESC 
+            LIMIT 1
+        """)
+        with conn.session as session:
+            result = session.execute(query, {"id": identifier.strip()}).fetchone()
+            return result
+    except Exception as e:
+        st.error(f"Error searching database: {e}")
+        return None

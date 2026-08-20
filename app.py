@@ -22,11 +22,10 @@ init_db()
 
 # Navigation setup using st.navigation and st.Page
 page_1 = st.Page("pages/registration.py", title="Registration Form", icon="📝", default=True)
-page_2 = st.Page("pages/gallery.py", title="Media Gallery", icon="🖼️")
+page_3 = st.Page("pages/gallery.py", title="Media Gallery", icon="🖼️")
+page_2 = st.Page("pages/certificate_download.py", title="Download Certificate", icon="📜")
 
-pg = st.navigation([page_1, page_2],    
-                   position="top",
-                   expanded=True,)
+pg = st.navigation([page_1, page_2, page_3], position="top", expanded=True)
 
 # Header Title
 st.title("DISTRICT ADMINISTRATION JAMMU - VAN MAHOTSAV 2026")

@@ -1,13 +1,11 @@
 import io
-from sqlalchemy import text
-from db import conn
-import streamlit as st
-from PIL import Image
-
 import datetime
 import zoneinfo
+import streamlit as st
+from sqlalchemy import text
 from PIL import Image
-import io
+from db import conn
+from utils.certificate import generate_certificate
 
 # Get current date in IST for max_value bound and default value
 ist_today = datetime.datetime.now(zoneinfo.ZoneInfo("Asia/Kolkata")).date()
@@ -121,6 +119,22 @@ elif submit_button:
                     "plantation_date": plantation_done_on
                 })
                 session.commit()
+            # Generate Certificate Bytes
+            cert_bytes = generate_certificate(name, str(plantation_done_on))
+
+            st.toast("Form submitted successfully! Thank you for participating in Van Mahotsav 2026.", icon="🎉")
+            st.balloons()
+
+            st.success("✅ Submission Successful! Your certificate is ready.")
+            st.image(cert_bytes, caption="Generated Certificate Preview", use_container_width=True)
+
+            st.download_button(
+                label="📥 Download Your Certificate",
+                data=cert_bytes,
+                file_name=f"Van_Mahotsav_Certificate_{name.replace(' ', '_')}.png",
+                mime="image/png",
+                use_container_width=True
+            )
 
             # Clear cached queries so the new entry immediately reflects in the gallery
             st.cache_data.clear()
