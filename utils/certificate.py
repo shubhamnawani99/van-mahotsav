@@ -2,18 +2,29 @@ import os
 import io
 from PIL import Image, ImageDraw, ImageFont
 
-# Define absolute directory path relative to this script file
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FONTS_DIR = os.path.join(BASE_DIR, "fonts")
 
 def get_font(font_name: str, size: int):
-    """Safely fetch custom font from local repository, falling back gracefully."""
-    font_path = os.path.join(FONTS_DIR, font_name)
-    if os.path.exists(font_path):
-        return ImageFont.truetype(font_path, size)
-    else:
-        # Fallback if font file is missing
-        return ImageFont.load_default()
+    """Case-insensitive local font loader with Linux system fallback."""
+    # 1. Search fonts/ directory (case-insensitive)
+    if os.path.exists(FONTS_DIR):
+        for file in os.listdir(FONTS_DIR):
+            if file.lower() == font_name.lower():
+                return ImageFont.truetype(os.path.join(FONTS_DIR, file), size)
+
+    # 2. Linux System Fonts Fallback (Streamlit Cloud Debian Environment)
+    system_font_paths = [
+        f"/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if "bd" in font_name.lower() or "georgia" in font_name.lower() else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+        "/usr/share/fonts/truetype/freefont/FreeSans.ttf"
+    ]
+    for sys_path in system_font_paths:
+        if os.path.exists(sys_path):
+            return ImageFont.truetype(sys_path, size)
+
+    # 3. Last-resort default PIL font
+    return ImageFont.load_default()
 
 def generate_certificate(name: str, plantation_date: str, tree_count: int = 1) -> bytes:
     bg_path = os.path.join(BASE_DIR, "certificate_bg.png")
