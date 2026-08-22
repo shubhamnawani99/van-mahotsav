@@ -199,7 +199,7 @@ def generate_paalna_certificate(
 
     pdf.set_xy(10, start_y + img_box_h + 4)
 
-    pdf.set_font("NotoHindi", style="B", size=12)
+    pdf.set_font("NotoHindi", style="B", size=11)
     
     # 7. Signatures Block
     sig_data = [
