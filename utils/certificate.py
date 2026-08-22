@@ -24,7 +24,6 @@ class CertificatePDF(FPDF):
         self.set_font("NotoHindi", style="", size=9)
         self.set_text_color(68, 68, 68)
 
-
 def generate_paalna_certificate(
     student_name: str, student_class: str, school_name: str, 
     tree_name: str, species: str, planted_on: str, 
