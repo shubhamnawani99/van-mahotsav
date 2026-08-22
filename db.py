@@ -80,3 +80,46 @@ def get_submission_by_identifier(identifier: str):
     except Exception as e:
         st.error(f"Error searching record: {e}")
         return None
+
+def search_submissions_by_name_or_tree_id(query_str: str, limit: int = 20):
+    try:
+        clean_query = query_str.strip()
+
+        # Check if the search term can be parsed as an integer Tree ID
+        is_numeric = clean_query.isdigit()
+        tree_id = int(clean_query) if is_numeric else -1
+
+        query = text("""
+            SELECT id, student_name, student_class, school_name, tree_name, species, 
+                   planted_on, height_cm, location, teacher_name, holiday_guardian, photo_bytes
+            FROM paalna_submissions 
+            WHERE student_name ILIKE :name_pattern 
+               OR (:is_numeric = TRUE AND id = :tree_id)
+            ORDER BY submitted_at DESC 
+            LIMIT :limit
+        """)
+
+        with conn.session as session:
+            result = session.execute(
+                query,
+                {
+                    "name_pattern": f"%{clean_query}%",
+                    "is_numeric": is_numeric,
+                    "tree_id": tree_id,
+                    "limit": limit,
+                },
+            )
+
+            clean_rows = []
+            for row in result:
+                data = list(row)
+                # Handle binary memoryview conversions for Streamlit render
+                if isinstance(data[11], memoryview):
+                    data[11] = data[11].tobytes()
+                clean_rows.append(tuple(data))
+
+            return clean_rows
+
+    except Exception as e:
+        st.error(f"Error searching records: {e}")
+        return []
