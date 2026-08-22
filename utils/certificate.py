@@ -199,7 +199,7 @@ def generate_paalna_certificate(
 
     pdf.set_xy(10, start_y + img_box_h + 4)
 
-    pdf.set_font("NotoHindi", style="B", size=10.5)
+    pdf.set_font("NotoHindi", style="B", size=10)
     
     # 7. Signatures Block
     sig_data = [
@@ -226,9 +226,10 @@ def generate_paalna_certificate(
             for cell in row:
                 r.cell(cell)
 
-    pdf.ln(5)
-    pdf.set_font("NotoHindi", style="B", size=12)
+    # 8. Bottom Tagline (Anchored right above the bottom green border)
+    pdf.set_y(-18)  # Sets vertical position ~18mm from the bottom of the page
+    pdf.set_font("NotoHindi", style="B", size=11)
     pdf.set_text_color(11, 110, 56)
-    pdf.cell(0, 4, "हर पेड़ का एक नाम, हर नाम का एक ज़िम्मेदार", align="C")
+    pdf.cell(0, 5, "हर पेड़ का एक नाम, हर नाम का एक ज़िम्मेदार", align="C")
 
     return bytes(pdf.output())
