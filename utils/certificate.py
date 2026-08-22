@@ -176,8 +176,8 @@ def generate_paalna_certificate(
             im_cropped = ImageOps.fit(im, (400, 400), centering=(0.5, 0.5))
             
             img_buf = io.BytesIO()
-            im_cropped.save(img_buf, format="JPEG", quality=85)
             img_buf.seek(0)
+            im_cropped.save(img_buf, format="JPEG", quality=85)
 
             # Place image in middle of center box
             photo_size = 38  # 38mm x 38mm
