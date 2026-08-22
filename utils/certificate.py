@@ -192,7 +192,7 @@ def generate_paalna_certificate(
             photo_size = 48
             px = img_box_x + (img_box_w - photo_size) / 2
             py = start_y + (img_box_h - photo_size) / 2
-            pdf.image(img_buf, x=px, y=py, w=photo_size, h=photo_size+12)
+            pdf.image(img_buf, x=px, y=py, w=photo_size, h=photo_size)
         except Exception:
             pass
     # Move cursor below the growth grid table
@@ -208,10 +208,19 @@ def generate_paalna_certificate(
          f"सह-संरक्षक शिक्षक\nCo-guardian teacher\n{teacher_name.title()}", 
          f"अवकाश संरक्षक\nHoliday guardian\n{holiday_guardian.title()}"],
         ["\n\n\n"],
-        ["मंडलीय वन अधिकारी / Divisional Forest Officer\nअनुराग आर्य, आई.एफ.एस. / Anurag Arya, IFS", "", 
+    ]
+
+    with pdf.table(col_widths=(63, 64, 63), line_height=4, text_align="CENTER", borders_layout="NONE") as table:
+        for row in sig_data:
+            r = table.row()
+            for cell in row:
+                r.cell(cell)
+
+    sig_data = [
+        ["मंडलीय वन अधिकारी / Divisional Forest Officer\nअनुराग आर्य, आई.एफ.एस. / Anurag Arya, IFS", 
         "उपायुक्त, जम्मू / Deputy Commissioner, Jammu\n डॉ. राकेश मिन्हास, आई.ए.एस / Dr. Rakesh Minhas, IAS"]
     ]
-    with pdf.table(col_widths=(63, 64, 63), line_height=4, text_align="CENTER", borders_layout="NONE") as table:
+    with pdf.table(col_widths=(95, 95), line_height=4, text_align="CENTER", borders_layout="NONE") as table:
         for row in sig_data:
             r = table.row()
             for cell in row:
