@@ -88,8 +88,8 @@ def generate_paalna_certificate(
     # 4. Metadata Grid (Table)
     tree_id = f"TREE-{formatted_id}"
     grid_data = [
-        ["वृक्ष का नाम / Tree's Name", tree_name, "वृक्ष क्रमांक / Tree ID", tree_id],
-        ["प्रजाति / Species", species, "रोपण तिथि / Planted On", planted_on],
+        ["वृक्ष का नाम / Tree's Name (Local)", tree_name, "वृक्ष क्रमांक / Tree ID", tree_id],
+        ["प्रजाति / Species (Scientific Name)", species, "रोपण तिथि / Planted On", planted_on],
         ["ऊँचाई सें.मी. / Height (cms.)", f"{height_cm} cm", "स्थान / Location", location]
     ]
     

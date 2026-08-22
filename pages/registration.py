@@ -17,8 +17,8 @@ with st.form(key="paalna_form", clear_on_submit=False):
         student_name = st.text_input("1. Student Name*", placeholder="Enter student full name")
         student_class = st.text_input("2. Class*", placeholder="e.g., 8th-A")
         school_name = st.text_input("3. School Name*", placeholder="e.g., Govt Higher Sec School Jammu")
-        tree_name = st.text_input("4. Tree's Name*", placeholder="e.g., Green Warrior")
-        species = st.text_input("5. Tree Species*", placeholder="e.g., Neem / Mango / Chinar")
+        tree_name = st.text_input("4. Tree's Name (Local)*", placeholder="e.g., Neem / Mango / Chinar")
+        species = st.text_input("5. Tree Species (Scientific Name)*", placeholder="e.g., Azadirachta indica /  Mangifera indica / Ficus benghalensis")
     
     with col2:
         planted_on = st.date_input("6. Planted On*", value=ist_today, max_value=ist_today)
