@@ -1,5 +1,6 @@
 import os
-import random
+import io
+from PIL import Image
 from fpdf import FPDF
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -8,14 +9,13 @@ FONTS_DIR = os.path.join(BASE_DIR, "fonts")
 REG_FONT_PATH = os.path.join(FONTS_DIR, "NotoSansDevanagari-Regular.ttf")
 BOLD_FONT_PATH = os.path.join(FONTS_DIR, "NotoSansDevanagari-Bold.ttf")
 
-# System fallbacks if local fonts directory is missing fonts
 if not os.path.exists(REG_FONT_PATH):
     REG_FONT_PATH = "/usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf"
 
 if not os.path.exists(BOLD_FONT_PATH):
     BOLD_FONT_PATH = "/usr/share/fonts/truetype/noto/NotoSansDevanagari-Bold.ttf"
     if not os.path.exists(BOLD_FONT_PATH):
-        BOLD_FONT_PATH = REG_FONT_PATH  # Fallback to regular if bold doesn't exist
+        BOLD_FONT_PATH = REG_FONT_PATH
 
 
 class CertificatePDF(FPDF):
@@ -30,23 +30,20 @@ class CertificatePDF(FPDF):
 def generate_paalna_certificate(
     student_name: str, student_class: str, school_name: str, 
     tree_name: str, species: str, planted_on: str, 
-    height_cm: str, location: str, teacher_name: str, holiday_guardian: str
+    height_cm: str, location: str, teacher_name: str, holiday_guardian: str,
+    submission_id: int = 1, photo_bytes: bytes = None
 ) -> bytes:
     
     pdf = CertificatePDF(orientation="P", unit="mm", format="A4")
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
     
-    # Register Noto Sans Devanagari Regular and Bold fonts
     pdf.add_font("NotoHindi", style="", fname=REG_FONT_PATH)
     pdf.add_font("NotoHindi", style="B", fname=BOLD_FONT_PATH)
     pdf.add_font("NotoHindi", style="I", fname=REG_FONT_PATH)
     pdf.add_font("NotoHindi", style="BI", fname=BOLD_FONT_PATH)
     
     pdf.set_font("NotoHindi", style="", size=10)
-    
-    # Enable HarfBuzz Devanagari Shaping natively inside FPDF2
-    # Fixes 'कि', half-letters, and halants
     pdf.set_text_shaping(True)
 
     # 1. Outer Double Green Border
@@ -56,13 +53,22 @@ def generate_paalna_certificate(
     pdf.set_line_width(0.3)
     pdf.rect(9, 9, 192, 279)
 
-    # 2. Header Section
+    # 2. Add Tree Image at Top-Left (Inside top margin)
+    if photo_bytes:
+        try:
+            image_stream = io.BytesIO(photo_bytes)
+            # Coordinates (x=12, y=12), width=30mm
+            pdf.image(image_stream, x=12, y=12, w=30)
+        except Exception as e:
+            pass
+
+    # 3. Header Section
     pdf.set_text_color(11, 110, 56)
     pdf.set_font("NotoHindi", style="B", size=14)
     pdf.cell(0, 7, "जिला प्रशासन जम्मू / DISTRICT ADMINISTRATION JAMMU", align="C", new_x="LMARGIN", new_y="NEXT")
     pdf.cell(0, 7, "पालना / PAALNA", align="C", new_x="LMARGIN", new_y="NEXT")
     
-    pdf.set_text_color(217, 83, 79) # Crimson Motto
+    pdf.set_text_color(217, 83, 79)
     pdf.set_font("NotoHindi", style="B", size=11)
     pdf.cell(0, 6, "पेड़ लगाओ नहीं – पेड़ पालो।", align="C", new_x="LMARGIN", new_y="NEXT")
     pdf.set_text_color(51, 51, 51)
@@ -73,14 +79,15 @@ def generate_paalna_certificate(
     pdf.set_font("NotoHindi", style="B", size=12)
     pdf.cell(0, 6, "वृक्ष गोद-ग्रहण प्रमाण-पत्र / CERTIFICATE OF TREE ADOPTION", align="C", new_x="LMARGIN", new_y="NEXT")
     
-    # Serial Number
-    serial_no = f"PAALNA/2026/{random.randint(1000, 9999)}"
+    # Sequential Serial Number (e.g. PAALNA/2026/00001)
+    formatted_id = f"{submission_id:05d}"
+    serial_no = f"PAALNA/2026/{formatted_id}"
     pdf.set_font("NotoHindi", style="", size=9)
     pdf.set_text_color(51, 51, 51)
     pdf.cell(0, 5, f"क्रमांक / NO. {serial_no}", align="R", new_x="LMARGIN", new_y="NEXT")
     pdf.ln(2)
 
-    # 3. Adopter Certification Clause
+    # 4. Adopter Certification Clause
     cert_text = (
         f"प्रमाणित किया जाता है कि {student_name.title()} (कक्षा: {student_class}), "
         f"{school_name} ने नीचे दर्ज वृक्ष को गोद लिया है। आज से इसकी देखभाल की ज़िम्मेदारी इनकी है।\n"
@@ -90,8 +97,8 @@ def generate_paalna_certificate(
     pdf.multi_cell(0, 5, cert_text, align="L")
     pdf.ln(4)
 
-    # 4. Metadata Grid (Table)
-    tree_id = f"TREE-{random.randint(10000, 99999)}"
+    # 5. Metadata Grid (Table)
+    tree_id = f"TREE-{formatted_id}"
     grid_data = [
         ["वृक्ष का नाम / Tree's Name", tree_name, "वृक्ष क्रमांक / Tree ID", tree_id],
         ["प्रजाति / Species", species, "रोपण तिथि / Planted On", planted_on],
@@ -106,7 +113,7 @@ def generate_paalna_certificate(
 
     pdf.ln(4)
 
-    # 5. The Pledge Block
+    # 6. The Pledge Block
     pledge_text = (
         "शपथ / THE PLEDGE\n"
         "यह पेड़ मेरा है। मैं इसे रोज़ देखने जाऊँगा/जाऊँगी, पानी दूंगा/दूँगी, और इसे बड़ा होते हुए देखूँगा / देखूँगा। "
@@ -117,7 +124,7 @@ def generate_paalna_certificate(
     pdf.multi_cell(0, 5, pledge_text, border=1, fill=True, align="L")
     pdf.ln(4)
 
-    # 6. 12-Month Growth Record Table
+    # 7. 12-Month Growth Record Table
     pdf.set_font("NotoHindi", style="B", size=10)
     pdf.set_text_color(11, 110, 56)
     pdf.cell(0, 5, "बारह-महीनों की बही / 12-MONTH GROWTH RECORD", align="C", new_x="LMARGIN", new_y="NEXT")
@@ -144,8 +151,9 @@ def generate_paalna_certificate(
 
     pdf.ln(6)
 
-    # 7. Signatures Block
+    # 8. Signatures Block
     sig_data = [
+        ["\n"],
         [f"गोद लेने वाला विद्यार्थी\nAdopter student\n{student_name.title()}", 
          f"सह-संरक्षक शिक्षक\nCo-guardian teacher\n{teacher_name.title()}", 
          f"अवकाश संरक्षक\nHoliday guardian\n{holiday_guardian.title()}"],

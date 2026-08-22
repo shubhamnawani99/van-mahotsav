@@ -62,15 +62,21 @@ def fetch_submissions(limit=10):
 def get_submission_by_identifier(identifier: str):
     try:
         query = text("""
-            SELECT student_name, student_class, school_name, tree_name, species, 
-                   planted_on, height_cm, location, teacher_name, holiday_guardian
+            SELECT id, student_name, student_class, school_name, tree_name, species, 
+                   planted_on, height_cm, location, teacher_name, holiday_guardian, photo_bytes
             FROM paalna_submissions 
             WHERE LOWER(student_name) = LOWER(:id) OR LOWER(tree_name) = LOWER(:id)
             ORDER BY submitted_at DESC 
             LIMIT 1
         """)
         with conn.session as session:
-            return session.execute(query, {"id": identifier.strip()}).fetchone()
+            row = session.execute(query, {"id": identifier.strip()}).fetchone()
+            if row:
+                data = list(row)
+                if isinstance(data[11], memoryview):
+                    data[11] = data[11].tobytes()
+                return tuple(data)
+            return None
     except Exception as e:
         st.error(f"Error searching record: {e}")
         return None

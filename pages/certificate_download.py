@@ -1,6 +1,7 @@
 import streamlit as st
 import fitz  # PyMuPDF
-from db import get_submission_by_identifier
+from db import conn, get_submission_by_identifier
+from sqlalchemy import text
 from utils.certificate import generate_paalna_certificate
 
 st.markdown("## 📜 Search & Download PAALNA Certificate")
@@ -12,17 +13,25 @@ if st.button("Search & Generate", type="primary"):
     if search_query.strip():
         record = get_submission_by_identifier(search_query)
         if record:
-            (s_name, s_class, sch_name, t_name, species, p_date, height, loc, teacher, h_guardian) = record
+            (sub_id, s_name, s_class, sch_name, t_name, species, p_date, height, loc, teacher, h_guardian, photo_bytes) = record
             
-            # 1. Generate PDF Bytes
+            # 1. Generate PDF Bytes with Database ID and Photo
             cert_bytes = generate_paalna_certificate(
-                student_name=s_name, student_class=s_class, school_name=sch_name,
-                tree_name=t_name, species=species, planted_on=str(p_date),
-                height_cm=str(height), location=loc, teacher_name=teacher,
-                holiday_guardian=h_guardian
+                student_name=s_name, 
+                student_class=s_class, 
+                school_name=sch_name,
+                tree_name=t_name, 
+                species=species, 
+                planted_on=str(p_date),
+                height_cm=str(height), 
+                location=loc, 
+                teacher_name=teacher,
+                holiday_guardian=h_guardian,
+                submission_id=sub_id,
+                photo_bytes=photo_bytes
             )
             
-            # 2. Render PDF Page to PNG image bytes
+            # 2. Render PDF Page to PNG image bytes using PyMuPDF
             doc = fitz.open(stream=cert_bytes, filetype="pdf")
             page = doc.load_page(0)
             pix = page.get_pixmap(dpi=150)
@@ -30,8 +39,8 @@ if st.button("Search & Generate", type="primary"):
             
             st.success(f"Certificate generated for student: **{s_name}** ({sch_name})")
             
-            # 3. Compact Layout: Place the image inside a smaller centered column
-            col1, col2, col3 = st.columns([1, 2, 1])  # Centers preview at ~50% width
+            # 3. Compact Layout: Place image inside centered column
+            col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
                 st.image(preview_img_bytes, caption="Certificate Preview", use_container_width=True)
             
