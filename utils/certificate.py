@@ -112,7 +112,7 @@ def generate_paalna_certificate(
     pdf.multi_cell(0, 4.5, pledge_text, border=1, fill=True, align="L")
     pdf.ln(3)
 
-    # 6. 12-Month Growth Record Table with Centered Image
+    # 6. Expanded 12-Month Growth Record Table with Centered Image
     pdf.set_font("NotoHindi", style="B", size=10)
     pdf.set_text_color(11, 110, 56)
     pdf.cell(0, 5, "बारह-महीनों की बही / 12-MONTH GROWTH RECORD", align="C", new_x="LMARGIN", new_y="NEXT")
@@ -123,72 +123,81 @@ def generate_paalna_certificate(
 
     # Save starting Y position for the grid
     start_y = pdf.get_y()
-    row_h = 6.5
+    
+    # Expanded Row Height Parameters
+    header_h = 8.0
+    row_h = 10.0  # Increased for ample space to write height details
+    img_box_h = header_h + (6 * row_h)  # Total table height = 68mm
+    
+    # Left Side: X = 10 to 78 (Width: 68mm)
+    # Center Image Box: X = 78 to 132 (Width: 54mm)
+    # Right Side: X = 132 to 200 (Width: 68mm)
+    img_box_x = 78
+    img_box_w = 54
+    
+    # Column Widths: Month (14mm), Height (15mm), Alive (15mm), Sign of Guardian (24mm)
     
     # Draw Table Headers
-    pdf.set_font("NotoHindi", style="B", size=7.5)
+    pdf.set_font("NotoHindi", style="B", size=6.5)
     pdf.set_text_color(0, 0, 0)
     
     # Left Column Headers (Months 1-6)
     pdf.set_xy(10, start_y)
-    pdf.cell(18, 6, "MONTH", border=1, align="C")
-    pdf.cell(18, 6, "HEIGHT", border=1, align="C")
-    pdf.cell(32, 6, "SIGN", border=1, align="C")
+    pdf.cell(14, header_h, "MONTH", border=1, align="C")
+    pdf.cell(15, header_h, "HEIGHT", border=1, align="C")
+    pdf.cell(15, header_h, "ALIVE\n(Y/N)", border=1, align="C")
+    pdf.cell(24, header_h, "SIGN OF\nGUARDIAN", border=1, align="C")
 
     # Right Column Headers (Months 7-12)
     pdf.set_xy(132, start_y)
-    pdf.cell(18, 6, "MONTH", border=1, align="C")
-    pdf.cell(18, 6, "HEIGHT", border=1, align="C")
-    pdf.cell(32, 6, "SIGN", border=1, align="C")
+    pdf.cell(14, header_h, "MONTH", border=1, align="C")
+    pdf.cell(15, header_h, "HEIGHT", border=1, align="C")
+    pdf.cell(15, header_h, "ALIVE\n(Y/N)", border=1, align="C")
+    pdf.cell(24, header_h, "SIGN OF\nGUARDIAN", border=1, align="C")
 
     # Draw 6 Rows (Left: M1-M6 | Right: M7-M12)
     pdf.set_font("NotoHindi", style="", size=8)
     for i in range(6):
-        curr_y = start_y + 6 + (i * row_h)
+        curr_y = start_y + header_h + (i * row_h)
         
         # Left Side: Month i+1
         pdf.set_xy(10, curr_y)
-        pdf.cell(18, row_h, f"M-{i+1}", border=1, align="C")
-        pdf.cell(18, row_h, "", border=1)
-        pdf.cell(32, row_h, "", border=1)
+        pdf.cell(14, row_h, f"M-{i+1}", border=1, align="C")
+        pdf.cell(15, row_h, "", border=1)
+        pdf.cell(15, row_h, "", border=1)
+        pdf.cell(24, row_h, "", border=1)
 
         # Right Side: Month i+7
         pdf.set_xy(132, curr_y)
-        pdf.cell(18, row_h, f"M-{i+7}", border=1, align="C")
-        pdf.cell(18, row_h, "", border=1)
-        pdf.cell(32, row_h, "", border=1)
-
-    # Center Image Block (X: 82mm to 128mm)
-    img_box_x = 80
-    img_box_y = start_y
-    img_box_w = 50
-    img_box_h = 6 + (6 * row_h) # Total height of header + 6 rows = 45mm
+        pdf.cell(14, row_h, f"M-{i+7}", border=1, align="C")
+        pdf.cell(15, row_h, "", border=1)
+        pdf.cell(15, row_h, "", border=1)
+        pdf.cell(24, row_h, "", border=1)
 
     # Draw border box around center area
     pdf.set_draw_color(11, 110, 56)
-    pdf.rect(img_box_x, img_box_y, img_box_w, img_box_h)
+    pdf.rect(img_box_x, start_y, img_box_w, img_box_h)
 
     # Process & Crop Image to 1:1 Aspect Ratio if photo provided
     if photo_bytes:
         try:
             im = Image.open(io.BytesIO(photo_bytes))
-            # Crop image square from center
-            im_cropped = ImageOps.fit(im, (400, 400), centering=(0.5, 0.5))
+            im_cropped = ImageOps.fit(im, (500, 500), centering=(0.5, 0.5))
             
             img_buf = io.BytesIO()
-            img_buf.seek(0)
             im_cropped.save(img_buf, format="JPEG", quality=85)
+            img_buf.seek(0)
 
-            # Place image in middle of center box
-            photo_size = 38  # 38mm x 38mm
+            # Expanded Photo Frame Size (56mm x 56mm)
+            photo_size = 48
             px = img_box_x + (img_box_w - photo_size) / 2
-            py = img_box_y + (img_box_h - photo_size) / 2
+            py = start_y + (img_box_h - photo_size) / 2
             pdf.image(img_buf, x=px, y=py, w=photo_size, h=photo_size)
         except Exception:
             pass
 
     # Move cursor below the growth grid table
-    pdf.set_xy(10, start_y + img_box_h + 5)
+    pdf.set_xy(10, start_y + img_box_h + 4)
 
     # 7. Signatures Block
     sig_data = [
@@ -197,15 +206,15 @@ def generate_paalna_certificate(
          f"अवकाश संरक्षक\nHoliday guardian\n{holiday_guardian.title()}"],
         ["\nजिला वन अधिकारी \n\nDistrict Forest Officer", "", "\nउपायुक्त, जम्मू\n\nDeputy Commissioner, Jammu"]
     ]
-    with pdf.table(col_widths=(63, 64, 63), line_height=4.5, text_align="CENTER", borders_layout="NONE") as table:
+    with pdf.table(col_widths=(63, 64, 63), line_height=4, text_align="CENTER", borders_layout="NONE") as table:
         for row in sig_data:
             r = table.row()
             for cell in row:
                 r.cell(cell)
 
-    pdf.ln(3)
-    pdf.set_font("NotoHindi", style="B", size=10)
+    pdf.ln(2)
+    pdf.set_font("NotoHindi", style="B", size=9)
     pdf.set_text_color(11, 110, 56)
-    pdf.cell(0, 5, "हर पेड़ का एक नाम, हर नाम का एक ज़िम्मेदार", align="C")
+    pdf.cell(0, 4, "हर पेड़ का एक नाम, हर नाम का एक ज़िम्मेदार", align="C")
 
     return bytes(pdf.output())
