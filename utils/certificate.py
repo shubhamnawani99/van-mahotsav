@@ -215,9 +215,9 @@ def generate_paalna_certificate(
             for cell in row:
                 r.cell(cell)
 
-    pdf.ln(2)
+    pdf.ln(5)
     pdf.set_font("NotoHindi", style="B", size=12)
     pdf.set_text_color(11, 110, 56)
-    pdf.cell(0, 4, "\nहर पेड़ का एक नाम, हर नाम का एक ज़िम्मेदार", align="C")
+    pdf.cell(0, 4, "हर पेड़ का एक नाम, हर नाम का एक ज़िम्मेदार", align="C")
 
     return bytes(pdf.output())
