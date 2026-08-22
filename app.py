@@ -18,7 +18,7 @@ def load_css(file_name="styles.css"):
 load_css("styles.css")
 
 # Initialize Database Table
-init_db()
+# init_db()
 
 # Navigation setup using st.navigation and st.Page
 page_1 = st.Page("pages/registration.py", title="Registration Form", icon="📝", default=True)
