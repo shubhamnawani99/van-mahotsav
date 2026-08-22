@@ -23,8 +23,8 @@ with st.form(key="paalna_form", clear_on_submit=False):
     with col2:
         planted_on = st.date_input("6. Planted On*", value=ist_today, max_value=ist_today)
         height_cm = st.number_input("7. Height at Planting (cm)*", min_value=10, max_value=500, value=50)
-        location = st.text_input("8. Location / Lat-Long*", placeholder="e.g., School Garden (32.7266, 74.8570)")
         teacher_name = st.text_input("9. Co-guardian Teacher Name*", placeholder="Teacher in-charge name")
+        location = st.text_input("8. Location*", placeholder="e.g., School Garden (32.7266, 74.8570)")
         holiday_guardian = st.text_input("10. Holiday Guardian Name*", placeholder="Holiday caretaker name")
 
     photo = st.file_uploader("11. Upload Plantation Photo*", type=["jpg", "jpeg", "png"])

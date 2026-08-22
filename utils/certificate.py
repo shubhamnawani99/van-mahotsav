@@ -1,6 +1,6 @@
 import os
 import io
-from PIL import Image
+from PIL import Image, ImageOps
 from fpdf import FPDF
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,11 +20,9 @@ if not os.path.exists(BOLD_FONT_PATH):
 
 class CertificatePDF(FPDF):
     def footer(self):
-        self.set_y(-20)
+        self.set_y(-15)
         self.set_font("NotoHindi", style="", size=9)
         self.set_text_color(68, 68, 68)
-        self.cell(0, 10, "paalna.jammu.nic.in", align="L")
-        self.cell(0, 10, f"Page {self.page_no()}", align="R")
 
 
 def generate_paalna_certificate(
@@ -53,16 +51,7 @@ def generate_paalna_certificate(
     pdf.set_line_width(0.3)
     pdf.rect(9, 9, 192, 279)
 
-    # 2. Add Tree Image at Top-Left (Inside top margin)
-    if photo_bytes:
-        try:
-            image_stream = io.BytesIO(photo_bytes)
-            # Coordinates (x=12, y=12), width=30mm
-            pdf.image(image_stream, x=12, y=12, w=30)
-        except Exception as e:
-            pass
-
-    # 3. Header Section
+    # 2. Header Section
     pdf.set_text_color(11, 110, 56)
     pdf.set_font("NotoHindi", style="B", size=14)
     pdf.cell(0, 7, "जिला प्रशासन जम्मू / DISTRICT ADMINISTRATION JAMMU", align="C", new_x="LMARGIN", new_y="NEXT")
@@ -74,7 +63,7 @@ def generate_paalna_certificate(
     pdf.set_text_color(51, 51, 51)
     pdf.cell(0, 6, "DON'T PLANT A TREE. RAISE ONE.", align="C", new_x="LMARGIN", new_y="NEXT")
     
-    pdf.ln(3)
+    pdf.ln(2)
     pdf.set_text_color(11, 110, 56)
     pdf.set_font("NotoHindi", style="B", size=12)
     pdf.cell(0, 6, "वृक्ष गोद-ग्रहण प्रमाण-पत्र / CERTIFICATE OF TREE ADOPTION", align="C", new_x="LMARGIN", new_y="NEXT")
@@ -87,7 +76,7 @@ def generate_paalna_certificate(
     pdf.cell(0, 5, f"क्रमांक / NO. {serial_no}", align="R", new_x="LMARGIN", new_y="NEXT")
     pdf.ln(2)
 
-    # 4. Adopter Certification Clause
+    # 3. Adopter Certification Clause
     cert_text = (
         f"प्रमाणित किया जाता है कि {student_name.title()} (कक्षा: {student_class}), "
         f"{school_name} ने नीचे दर्ज वृक्ष को गोद लिया है। आज से इसकी देखभाल की ज़िम्मेदारी इनकी है।\n"
@@ -95,9 +84,9 @@ def generate_paalna_certificate(
     )
     pdf.set_font("NotoHindi", style="", size=10)
     pdf.multi_cell(0, 5, cert_text, align="L")
-    pdf.ln(4)
+    pdf.ln(3)
 
-    # 5. Metadata Grid (Table)
+    # 4. Metadata Grid (Table)
     tree_id = f"TREE-{formatted_id}"
     grid_data = [
         ["वृक्ष का नाम / Tree's Name", tree_name, "वृक्ष क्रमांक / Tree ID", tree_id],
@@ -105,15 +94,15 @@ def generate_paalna_certificate(
         ["ऊँचाई सें.मी. / Height (cms.)", f"{height_cm} cm", "स्थान / Location", location]
     ]
     
-    with pdf.table(col_widths=(50, 50, 50, 50), line_height=6, text_align="LEFT") as table:
+    with pdf.table(col_widths=(50, 50, 50, 50), line_height=5.5, text_align="LEFT") as table:
         for row in grid_data:
             r = table.row()
             for cell in row:
                 r.cell(cell)
 
-    pdf.ln(4)
+    pdf.ln(3)
 
-    # 6. The Pledge Block
+    # 5. The Pledge Block
     pledge_text = (
         "शपथ / THE PLEDGE\n"
         "यह पेड़ मेरा है। मैं इसे रोज़ देखने जाऊँगा/जाऊँगी, पानी दूंगा/दूँगी, और इसे बड़ा होते हुए देखूँगा / देखूँगा। "
@@ -121,10 +110,10 @@ def generate_paalna_certificate(
         "This tree is mine. I will visit it, water it, and watch it grow. For as long as I am at this school, this tree will not stand alone."
     )
     pdf.set_fill_color(253, 251, 247)
-    pdf.multi_cell(0, 5, pledge_text, border=1, fill=True, align="L")
-    pdf.ln(4)
+    pdf.multi_cell(0, 4.5, pledge_text, border=1, fill=True, align="L")
+    pdf.ln(3)
 
-    # 7. 12-Month Growth Record Table
+    # 6. 12-Month Growth Record Table with Centered Image
     pdf.set_font("NotoHindi", style="B", size=10)
     pdf.set_text_color(11, 110, 56)
     pdf.cell(0, 5, "बारह-महीनों की बही / 12-MONTH GROWTH RECORD", align="C", new_x="LMARGIN", new_y="NEXT")
@@ -133,40 +122,90 @@ def generate_paalna_certificate(
     pdf.cell(0, 4, "FILLED IN BY THE ADOPTER, ONCE A MONTH", align="C", new_x="LMARGIN", new_y="NEXT")
     pdf.ln(2)
 
-    pdf.set_font("NotoHindi", style="", size=9)
+    # Save starting Y position for the grid
+    start_y = pdf.get_y()
+    row_h = 6.5
+    
+    # Draw Table Headers
+    pdf.set_font("NotoHindi", style="B", size=7.5)
     pdf.set_text_color(0, 0, 0)
-    with pdf.table(col_widths=(35, 40, 35, 80), line_height=5, text_align="CENTER") as table:
-        header = table.row()
-        header.cell("माह / MONTH")
-        header.cell("ऊँचाई सें.मी. / HEIGHT CM")
-        header.cell("जीवित ? / ALIVE?")
-        header.cell("संरक्षक के हस्ताक्षर / GUARDIAN'S SIGNATURE")
+    
+    # Left Column Headers (Months 1-6)
+    pdf.set_xy(10, start_y)
+    pdf.cell(18, 6, "MONTH", border=1, align="C")
+    pdf.cell(18, 6, "HEIGHT", border=1, align="C")
+    pdf.cell(32, 6, "SIGN", border=1, align="C")
+
+    # Right Column Headers (Months 7-12)
+    pdf.set_xy(132, start_y)
+    pdf.cell(18, 6, "MONTH", border=1, align="C")
+    pdf.cell(18, 6, "HEIGHT", border=1, align="C")
+    pdf.cell(32, 6, "SIGN", border=1, align="C")
+
+    # Draw 6 Rows (Left: M1-M6 | Right: M7-M12)
+    pdf.set_font("NotoHindi", style="", size=8)
+    for i in range(6):
+        curr_y = start_y + 6 + (i * row_h)
         
-        for i in range(12):
-            r = table.row()
-            r.cell(f"Month {i+1}")
-            r.cell("")
-            r.cell("")
-            r.cell("")
+        # Left Side: Month i+1
+        pdf.set_xy(10, curr_y)
+        pdf.cell(18, row_h, f"M-{i+1}", border=1, align="C")
+        pdf.cell(18, row_h, "", border=1)
+        pdf.cell(32, row_h, "", border=1)
 
-    pdf.ln(6)
+        # Right Side: Month i+7
+        pdf.set_xy(132, curr_y)
+        pdf.cell(18, row_h, f"M-{i+7}", border=1, align="C")
+        pdf.cell(18, row_h, "", border=1)
+        pdf.cell(32, row_h, "", border=1)
 
-    # 8. Signatures Block
+    # Center Image Block (X: 82mm to 128mm)
+    img_box_x = 80
+    img_box_y = start_y
+    img_box_w = 50
+    img_box_h = 6 + (6 * row_h) # Total height of header + 6 rows = 45mm
+
+    # Draw border box around center area
+    pdf.set_draw_color(11, 110, 56)
+    pdf.rect(img_box_x, img_box_y, img_box_w, img_box_h)
+
+    # Process & Crop Image to 1:1 Aspect Ratio if photo provided
+    if photo_bytes:
+        try:
+            im = Image.open(io.BytesIO(photo_bytes))
+            # Crop image square from center
+            im_cropped = ImageOps.fit(im, (400, 400), centering=(0.5, 0.5))
+            
+            img_buf = io.BytesIO()
+            im_cropped.save(img_buf, format="JPEG", quality=85)
+            img_buf.seek(0)
+
+            # Place image in middle of center box
+            photo_size = 38  # 38mm x 38mm
+            px = img_box_x + (img_box_w - photo_size) / 2
+            py = img_box_y + (img_box_h - photo_size) / 2
+            pdf.image(img_buf, x=px, y=py, w=photo_size, h=photo_size)
+        except Exception:
+            pass
+
+    # Move cursor below the growth grid table
+    pdf.set_xy(10, start_y + img_box_h + 5)
+
+    # 7. Signatures Block
     sig_data = [
-        ["\n"],
         [f"गोद लेने वाला विद्यार्थी\nAdopter student\n{student_name.title()}", 
          f"सह-संरक्षक शिक्षक\nCo-guardian teacher\n{teacher_name.title()}", 
          f"अवकाश संरक्षक\nHoliday guardian\n{holiday_guardian.title()}"],
-        ["\nप्रधानाचार्य\n\nHead of School", "", "\nउपायुक्त, जम्मू\n\nDeputy Commissioner, Jammu"]
     ]
+        ["\nजिला वन अधिकारी \n\nDistrict Forest Officer", "", "\nउपायुक्त, जम्मू\n\nDeputy Commissioner, Jammu"]
     
-    with pdf.table(col_widths=(63, 64, 63), line_height=5, text_align="CENTER", borders_layout="NONE") as table:
+    with pdf.table(col_widths=(63, 64, 63), line_height=4.5, text_align="CENTER", borders_layout="NONE") as table:
         for row in sig_data:
             r = table.row()
             for cell in row:
                 r.cell(cell)
 
-    pdf.ln(4)
+    pdf.ln(3)
     pdf.set_font("NotoHindi", style="B", size=10)
     pdf.set_text_color(11, 110, 56)
     pdf.cell(0, 5, "हर पेड़ का एक नाम, हर नाम का एक ज़िम्मेदार", align="C")
