@@ -203,7 +203,7 @@ def generate_paalna_certificate(
     
     # 7. Signatures Block
     sig_data = [
-        ["\n"],
+        ["\n\n"],
         [f"गोद लेने वाला विद्यार्थी\nAdopter student\n{student_name.title()}", 
          f"सह-संरक्षक शिक्षक\nCo-guardian teacher\n{teacher_name.title()}", 
          f"अवकाश संरक्षक\nHoliday guardian\n{holiday_guardian.title()}"],
@@ -227,7 +227,8 @@ def generate_paalna_certificate(
                 r.cell(cell)
 
     # 8. Bottom Tagline (Anchored right above the bottom green border)
-    pdf.set_y(-18)  # Sets vertical position ~18mm from the bottom of the page
+    pdf.set_auto_page_break(auto=False) # Prevents page split when setting Y near bottom
+    pdf.set_y(278)                       # Exactly 10mm above the inner border (at Y=288)
     pdf.set_font("NotoHindi", style="B", size=11)
     pdf.set_text_color(11, 110, 56)
     pdf.cell(0, 5, "हर पेड़ का एक नाम, हर नाम का एक ज़िम्मेदार", align="C")
