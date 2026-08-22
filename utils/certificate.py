@@ -52,12 +52,12 @@ def generate_paalna_certificate(
 
     # 2. Header Section
     pdf.set_text_color(11, 110, 56)
-    pdf.set_font("NotoHindi", style="B", size=14)
+    pdf.set_font("NotoHindi", style="B", size=16)
     pdf.cell(0, 7, "जिला प्रशासन जम्मू / DISTRICT ADMINISTRATION JAMMU", align="C", new_x="LMARGIN", new_y="NEXT")
     pdf.cell(0, 7, "पालना / PAALNA", align="C", new_x="LMARGIN", new_y="NEXT")
     
     pdf.set_text_color(217, 83, 79)
-    pdf.set_font("NotoHindi", style="B", size=11)
+    pdf.set_font("NotoHindi", style="B", size=14)
     pdf.cell(0, 6, "पेड़ लगाओ नहीं – पेड़ पालो।", align="C", new_x="LMARGIN", new_y="NEXT")
     pdf.set_text_color(51, 51, 51)
     pdf.cell(0, 6, "DON'T PLANT A TREE. RAISE ONE.", align="C", new_x="LMARGIN", new_y="NEXT")
@@ -82,7 +82,7 @@ def generate_paalna_certificate(
         f"This certifies that the student named above has adopted the tree recorded below. From today, its care is in their hands."
     )
     pdf.set_font("NotoHindi", style="", size=10)
-    pdf.multi_cell(0, 5, cert_text, align="L")
+    pdf.multi_cell(0, 8, cert_text, align="L")
     pdf.ln(3)
 
     # 4. Metadata Grid (Table)
@@ -143,17 +143,17 @@ def generate_paalna_certificate(
     
     # Left Column Headers (Months 1-6)
     pdf.set_xy(10, start_y)
-    pdf.cell(14, header_h, "MONTH", border=1, align="C")
-    pdf.cell(15, header_h, "HEIGHT", border=1, align="C")
-    pdf.cell(15, header_h, "ALIVE\n(Y/N)", border=1, align="C")
-    pdf.cell(24, header_h, "SIGN OF\nGUARDIAN", border=1, align="C")
+    pdf.cell(14, header_h, "Month", border=1, align="C")
+    pdf.cell(15, header_h, "Height (cms)", border=1, align="C")
+    pdf.cell(15, header_h, "Alive (Y/N)", border=1, align="C")
+    pdf.cell(24, header_h, "Guardian's Sign", border=1, align="C")
 
     # Right Column Headers (Months 7-12)
     pdf.set_xy(132, start_y)
-    pdf.cell(14, header_h, "MONTH", border=1, align="C")
-    pdf.cell(15, header_h, "HEIGHT", border=1, align="C")
-    pdf.cell(15, header_h, "ALIVE\n(Y/N)", border=1, align="C")
-    pdf.cell(24, header_h, "SIGN OF\nGUARDIAN", border=1, align="C")
+    pdf.cell(14, header_h, "Month", border=1, align="C")
+    pdf.cell(15, header_h, "Height (cms)", border=1, align="C")
+    pdf.cell(24, header_h, "Guardian's Sign", border=1, align="C")
+    pdf.cell(15, header_h, "Alive (Y/N)", border=1, align="C")
 
     # Draw 6 Rows (Left: M1-M6 | Right: M7-M12)
     pdf.set_font("NotoHindi", style="", size=8)
@@ -195,16 +195,17 @@ def generate_paalna_certificate(
             pdf.image(img_buf, x=px, y=py, w=photo_size, h=photo_size)
         except Exception:
             pass
-
     # Move cursor below the growth grid table
+
     pdf.set_xy(10, start_y + img_box_h + 4)
 
     # 7. Signatures Block
     sig_data = [
+        ["\n"],
         [f"गोद लेने वाला विद्यार्थी\nAdopter student\n{student_name.title()}", 
          f"सह-संरक्षक शिक्षक\nCo-guardian teacher\n{teacher_name.title()}", 
          f"अवकाश संरक्षक\nHoliday guardian\n{holiday_guardian.title()}"],
-        ["\nजिला वन अधिकारी \n\nDistrict Forest Officer", "", "\nउपायुक्त, जम्मू\n\nDeputy Commissioner, Jammu"]
+        ["\nजिला वन अधिकारी \n\n\nDistrict Forest Officer", "", "\nउपायुक्त, जम्मू\n\n\nDeputy Commissioner, Jammu"]
     ]
     with pdf.table(col_widths=(63, 64, 63), line_height=4, text_align="CENTER", borders_layout="NONE") as table:
         for row in sig_data:
@@ -213,7 +214,7 @@ def generate_paalna_certificate(
                 r.cell(cell)
 
     pdf.ln(2)
-    pdf.set_font("NotoHindi", style="B", size=9)
+    pdf.set_font("NotoHindi", style="B", size=10)
     pdf.set_text_color(11, 110, 56)
     pdf.cell(0, 4, "हर पेड़ का एक नाम, हर नाम का एक ज़िम्मेदार", align="C")
 
