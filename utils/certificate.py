@@ -195,9 +195,8 @@ def generate_paalna_certificate(
         [f"गोद लेने वाला विद्यार्थी\nAdopter student\n{student_name.title()}", 
          f"सह-संरक्षक शिक्षक\nCo-guardian teacher\n{teacher_name.title()}", 
          f"अवकाश संरक्षक\nHoliday guardian\n{holiday_guardian.title()}"],
-    ]
         ["\nजिला वन अधिकारी \n\nDistrict Forest Officer", "", "\nउपायुक्त, जम्मू\n\nDeputy Commissioner, Jammu"]
-    
+    ]
     with pdf.table(col_widths=(63, 64, 63), line_height=4.5, text_align="CENTER", borders_layout="NONE") as table:
         for row in sig_data:
             r = table.row()
