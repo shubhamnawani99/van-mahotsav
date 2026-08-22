@@ -112,7 +112,7 @@ def generate_paalna_certificate(
     pdf.multi_cell(0, 5.5, pledge_text, border=1, fill=True, align="L")
     pdf.ln(3)
 
-    # 6. Expanded 12-Month Growth Record Table with Centered Image
+    # 6. Expanded 12-Month Growth Record Table with Full-Height Centered Image
     pdf.set_font("NotoHindi", style="B", size=10)
     pdf.set_text_color(11, 110, 56)
     pdf.cell(0, 5, "बारह-महीनों की बही / 12-MONTH GROWTH RECORD", align="C", new_x="LMARGIN", new_y="NEXT")
@@ -134,8 +134,6 @@ def generate_paalna_certificate(
     # Right Side: X = 132 to 200 (Width: 68mm)
     img_box_x = 78
     img_box_w = 54
-    
-    # Column Widths: Month (14mm), Height (15mm), Alive (15mm), Sign of Guardian (24mm)
     
     # Draw Table Headers
     pdf.set_font("NotoHindi", style="B", size=6.5)
@@ -174,32 +172,32 @@ def generate_paalna_certificate(
         pdf.cell(15, row_h, "", border=1)
         pdf.cell(24, row_h, "", border=1)
 
-    # Draw border box around center area
-    pdf.set_draw_color(11, 110, 56)
-    pdf.rect(img_box_x, start_y, img_box_w, img_box_h)
-
-    # Process & Crop Image to 1:1 Aspect Ratio if photo provided
+    # Process & Crop Image to span full width and height of middle table space
     if photo_bytes:
         try:
             im = Image.open(io.BytesIO(photo_bytes))
-            im_cropped = ImageOps.fit(im, (500, 500), centering=(0.5, 0.5))
+            # Crop image dynamically to match exact aspect ratio of middle column (54 x 68)
+            target_pixel_w = 540
+            target_pixel_h = int(540 * (img_box_h / img_box_w))
+            im_cropped = ImageOps.fit(im, (target_pixel_w, target_pixel_h), centering=(0.5, 0.5))
             
             img_buf = io.BytesIO()
             im_cropped.save(img_buf, format="JPEG", quality=85)
             img_buf.seek(0)
 
-            # Expanded Photo Frame Size (56mm x 56mm)
-            photo_size = 48
-            px = img_box_x + (img_box_w - photo_size) / 2
-            py = start_y + (img_box_h - photo_size) / 2
-            pdf.image(img_buf, x=px, y=py, w=photo_size, h=photo_size)
+            # Draw image spanning whole width and height of the middle section
+            pdf.image(img_buf, x=img_box_x, y=start_y, w=img_box_w, h=img_box_h)
         except Exception:
             pass
-    # Move cursor below the growth grid table
 
+    # Draw outer green border box around middle image area
+    pdf.set_draw_color(11, 110, 56)
+    pdf.rect(img_box_x, start_y, img_box_w, img_box_h)
+
+    # Move cursor below the growth grid table
     pdf.set_xy(10, start_y + img_box_h + 4)
 
-    pdf.set_font("NotoHindi", style="B", size=9)
+    pdf.set_font("NotoHindi", style="B", size=9.5)
     
     # 7. Signatures Block
     sig_data = [
@@ -220,7 +218,7 @@ def generate_paalna_certificate(
 
     sig_data = [
         ["अनुराग आर्य, आई.एफ.एस. / Anurag Arya, IFS\nमंडलीय वन अधिकारी / Divisional Forest Officer", 
-        "डॉ. राकेश मिन्हास, आई.ए.एस / Dr. Rakesh Minhas, IAS\nउपायुक्त, जम्मू / Deputy Commissioner, Jammu"]
+         "डॉ. राकेश मिन्हास, आई.ए.एस / Dr. Rakesh Minhas, IAS\nउपायुक्त, जम्मू / Deputy Commissioner, Jammu"]
     ]
     with pdf.table(col_widths=(95, 95), line_height=4, text_align="CENTER", borders_layout="NONE") as table:
         for row in sig_data:
@@ -228,9 +226,9 @@ def generate_paalna_certificate(
             for cell in row:
                 r.cell(cell)
 
-    # 8. Bottom Tagline (Anchored right above the bottom green border)
-    pdf.set_auto_page_break(auto=False) # Prevents page split when setting Y near bottom
-    pdf.set_y(278)                       # Exactly 10mm above the inner border (at Y=288)
+    # 8. Bottom Tagline
+    pdf.set_auto_page_break(auto=False)
+    pdf.set_y(278)
     pdf.set_font("NotoHindi", style="B", size=11)
     pdf.set_text_color(11, 110, 56)
     pdf.cell(0, 5, "हर पेड़ का एक नाम, हर नाम का एक ज़िम्मेदार", align="C")
