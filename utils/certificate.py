@@ -192,14 +192,14 @@ def generate_paalna_certificate(
             photo_size = 48
             px = img_box_x + (img_box_w - photo_size) / 2
             py = start_y + (img_box_h - photo_size) / 2
-            pdf.image(img_buf, x=px, y=py, w=photo_size, h=photo_size)
+            pdf.image(img_buf, x=px, y=py, w=photo_size, h=photo_size+12)
         except Exception:
             pass
     # Move cursor below the growth grid table
 
     pdf.set_xy(10, start_y + img_box_h + 4)
 
-    pdf.set_font("NotoHindi", style="B", size=11)
+    pdf.set_font("NotoHindi", style="B", size=10.5)
     
     # 7. Signatures Block
     sig_data = [
@@ -207,7 +207,9 @@ def generate_paalna_certificate(
         [f"गोद लेने वाला विद्यार्थी\nAdopter student\n{student_name.title()}", 
          f"सह-संरक्षक शिक्षक\nCo-guardian teacher\n{teacher_name.title()}", 
          f"अवकाश संरक्षक\nHoliday guardian\n{holiday_guardian.title()}"],
-        ["\nजिला वन अधिकारी \n\n\nDistrict Forest Officer", "", "\nउपायुक्त, जम्मू\n\n\nDeputy Commissioner, Jammu"]
+        ["\n\n\n"],
+        ["मंडलीय वन अधिकारी / Divisional Forest Officer\nअनुराग आर्य, आई.एफ.एस. / Anurag Arya, IFS", "", 
+        "उपायुक्त, जम्मू / Deputy Commissioner, Jammu\n डॉ. राकेश मिन्हास, आई.ए.एस / Dr. Rakesh Minhas, IAS"]
     ]
     with pdf.table(col_widths=(63, 64, 63), line_height=4, text_align="CENTER", borders_layout="NONE") as table:
         for row in sig_data:
