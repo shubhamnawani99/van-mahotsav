@@ -199,14 +199,14 @@ def generate_paalna_certificate(
 
     pdf.set_xy(10, start_y + img_box_h + 4)
 
-    pdf.set_font("NotoHindi", style="B", size=10)
+    pdf.set_font("NotoHindi", style="B", size=9)
     
     # 7. Signatures Block
     sig_data = [
         ["\n\n"],
-        [f"गोद लेने वाला विद्यार्थी\nAdopter student\n{student_name.title()}", 
-         f"सह-संरक्षक शिक्षक\nCo-guardian teacher\n{teacher_name.title()}", 
-         f"अवकाश संरक्षक\nHoliday guardian\n{holiday_guardian.title()}"],
+        [f"{student_name.title()}\nगोद लेने वाला विद्यार्थी, Adopter student", 
+         f"{teacher_name.title()}\nसह-संरक्षक शिक्षक, Co-guardian teacher", 
+         f"{holiday_guardian.title()}\nअवकाश संरक्षक, Holiday guardian"],
         ["\n\n\n"],
     ]
 
@@ -216,9 +216,11 @@ def generate_paalna_certificate(
             for cell in row:
                 r.cell(cell)
 
+    pdf.set_font("NotoHindi", style="B", size=10)
+
     sig_data = [
-        ["मंडलीय वन अधिकारी / Divisional Forest Officer\nअनुराग आर्य, आई.एफ.एस. / Anurag Arya, IFS", 
-        "उपायुक्त, जम्मू / Deputy Commissioner, Jammu\n डॉ. राकेश मिन्हास, आई.ए.एस / Dr. Rakesh Minhas, IAS"]
+        ["अनुराग आर्य, आई.एफ.एस. / Anurag Arya, IFS\nमंडलीय वन अधिकारी / Divisional Forest Officer", 
+        "डॉ. राकेश मिन्हास, आई.ए.एस / Dr. Rakesh Minhas, IAS\nउपायुक्त, जम्मू / Deputy Commissioner, Jammu"]
     ]
     with pdf.table(col_widths=(95, 95), line_height=4, text_align="CENTER", borders_layout="NONE") as table:
         for row in sig_data:
